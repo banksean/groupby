@@ -1,3 +1,9 @@
+// Package groupby implements grouping for slices of interface{}.
+// It is not intended to be performant or type-safe, just generic and easy to use.
+//
+// While Field and Func both assume each value in in is to be grouped by a single key value,
+// FuncChan can be used in situations where a value in in may be grouped into multiple, or
+// no groups.
 package groupby
 
 import "reflect"
@@ -16,6 +22,7 @@ func Field(in interface{}, fieldName string) map[interface{}][]interface{} {
 	return ret
 }
 
+// Func groups structs by values returned by keyFunc, which must return a type that may be used as a key in a map.
 func Func(in interface{}, keyFunc func(i interface{}) interface{}) map[interface{}][]interface{} {
 	ret := map[interface{}][]interface{}{}
 	inval := reflect.ValueOf(in)
@@ -28,6 +35,7 @@ func Func(in interface{}, keyFunc func(i interface{}) interface{}) map[interface
 	return ret
 }
 
+// FuncChan groups structs by values sent on a channel returned by keyFunc. It assumes keyFunc closes the chan it returns.
 func FuncChan(in interface{}, keyFunc func(i interface{}) chan interface{}) map[interface{}][]interface{} {
 	ret := map[interface{}][]interface{}{}
 	inval := reflect.ValueOf(in)
