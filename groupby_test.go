@@ -1,6 +1,7 @@
 package groupby
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -187,4 +188,49 @@ func TestChan(t *testing.T) {
 			a[0], a[4],
 		})
 	})
+}
+
+func ExampleField() {
+	a := []T{{"a", "b", 0, nil}, {"a", "c", 1, nil}, {"b", "b", 1, nil}, {"b", "d", 3, nil}, {"c", "x", 3, nil}}
+
+	grouped := Field(a, "B")
+	fmt.Printf("%+v", grouped["b"])
+	// Output: [{A:a B:b C:0 D:[]} {A:b B:b C:1 D:[]}]
+}
+
+func ExampleFunc() {
+	a := []T{{"a", "b", 0, nil}, {"a", "c", 1, nil}, {"b", "b", 1, nil}, {"b", "d", 3, nil}, {"c", "x", 3, nil}}
+	groupFn := func(i interface{}) interface{} {
+		return i.(T).C * 2
+	}
+
+	grouped := Func(a, groupFn)
+	fmt.Printf("%+v", grouped[6])
+	// Output: [{A:b B:d C:3 D:[]} {A:c B:x C:3 D:[]}]
+}
+
+func ExampleChan() {
+	a := []T{
+		{"a", "b", 0, []int{0, 4}},
+		{"a", "c", 1, []int{0, 1}},
+		{"b", "b", 1, []int{0, 1, 2}},
+		{"b", "d", 3, []int{1, 2, 3}},
+		{"c", "x", 3, []int{1, 2, 3, 4}},
+		{"z", "z", 0, nil},
+	}
+
+	groupFn := func(i interface{}) chan interface{} {
+		c := make(chan interface{})
+		go func() {
+			for _, v := range i.(T).D {
+				c <- v
+			}
+			close(c)
+		}()
+		return c
+	}
+
+	grouped := Chan(a, groupFn)
+	fmt.Printf("%+v", grouped[3])
+	// Output: [{A:b B:d C:3 D:[1 2 3]} {A:c B:x C:3 D:[1 2 3 4]}]
 }

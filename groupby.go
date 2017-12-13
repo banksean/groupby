@@ -1,5 +1,5 @@
 // Package groupby implements grouping for slices of interface{}.
-// It is not intended to be performant or type-safe, just generic and easy to use.
+// It is not intended to be performant or type-safe, but rather generic and easy to use.
 //
 // While Field and Func both assume each value from in is to be grouped by a single key value,
 // Chan can be used in situations where a value from in may be grouped into multiple, or
